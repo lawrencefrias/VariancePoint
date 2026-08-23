@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from fastapi import FastAPI
 
-from .data import COMMUNITY_INSIGHTS, LIFECYCLE_EVENTS, TECHNOLOGIES
+from .data import COMMUNITY_INSIGHTS, LIFECYCLE_EVENTS, TECHNOLOGIES, _save_insights
 from .models import (
     CommunityInsight,
     DashboardSummary,
@@ -109,4 +109,5 @@ def list_community_insights():
 @app.post("/api/v1/community-insights", response_model=CommunityInsight)
 def create_community_insight(payload: CommunityInsight):
     COMMUNITY_INSIGHTS.append(payload)
+    _save_insights(COMMUNITY_INSIGHTS)
     return payload
