@@ -134,9 +134,9 @@ class Forecast(BaseModel):
 
 
 class CommunityInsight(BaseModel):
-    technology: str
-    expected_outcome: str
-    actual_outcome: str
+    technology: str = Field(..., max_length=100)
+    expected_outcome: str = Field(..., max_length=500)
+    actual_outcome: str = Field(..., max_length=500)
     would_repeat: bool
-    migration_duration_months: int
-    lessons_learned: str
+    migration_duration_months: int = Field(..., ge=0, le=600)
+    lessons_learned: str = Field(..., max_length=1000)
