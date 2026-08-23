@@ -84,6 +84,7 @@ def generate_reality(req: RealitySimulationRequest):
 @app.get("/api/v1/dashboard/summary", response_model=DashboardSummary)
 def dashboard_summary() -> DashboardSummary:
     debt_entries = debt_clock()
+    mortality_scores = [calculate_mortality_score(row) for row in MORTALITY_INPUTS]
     mortality_exposure = len(
         [
             row
@@ -91,13 +92,15 @@ def dashboard_summary() -> DashboardSummary:
             if risk_from_score(calculate_mortality_score(row)) in {RiskLevel.amber, RiskLevel.red}
         ]
     )
+    technology_health_score = round(100.0 - (sum(mortality_scores) / len(mortality_scores)), 2) if mortality_scores else 100.0
+    budget_impact_forecast = float(sum(e.estimated_remediation_effort_days for e in debt_entries) * 1_500)
 
     return DashboardSummary(
-        technology_health_score=68.4,
+        technology_health_score=technology_health_score,
         debt_exposure_count=len([e for e in debt_entries if e.days_remaining < 730]),
         upcoming_deadlines=len([e for e in debt_entries if 0 <= e.days_remaining < 365]),
         mortality_exposure_count=mortality_exposure,
-        budget_impact_forecast=2_450_000.0,
+        budget_impact_forecast=budget_impact_forecast,
         top_risks=[
             "Legacy identity stack concentration",
             "Virtualization platform lock-in",
@@ -119,6 +122,7 @@ def create_community_insight(payload: CommunityInsight):
     with _INSIGHTS_LOCK:
         if len(COMMUNITY_INSIGHTS) >= _MAX_INSIGHTS:
             raise HTTPException(status_code=429, detail="Submission quota reached")
-        COMMUNITY_INSIGHTS.append(payload)
-        _save_insights(COMMUNITY_INSIGHTS)
+        updated_insights = [*COMMUNITY_INSIGHTS, payload]
+        _save_insights(updated_insights)
+        COMMUNITY_INSIGHTS[:] = updated_insights
     return payload

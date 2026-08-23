@@ -4,7 +4,7 @@ from datetime import date
 from enum import Enum
 from typing import Dict, List
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 
 class RiskLevel(str, Enum):
@@ -36,11 +36,24 @@ class MortalityInput(BaseModel):
 
 
 class MortalityWeights(BaseModel):
-    adoption_weight: float = 0.2
-    community_weight: float = 0.2
-    vendor_weight: float = 0.2
-    talent_weight: float = 0.2
-    migration_weight: float = 0.2
+    adoption_weight: float = Field(default=0.2, ge=0.0, le=1.0, allow_inf_nan=False)
+    community_weight: float = Field(default=0.2, ge=0.0, le=1.0, allow_inf_nan=False)
+    vendor_weight: float = Field(default=0.2, ge=0.0, le=1.0, allow_inf_nan=False)
+    talent_weight: float = Field(default=0.2, ge=0.0, le=1.0, allow_inf_nan=False)
+    migration_weight: float = Field(default=0.2, ge=0.0, le=1.0, allow_inf_nan=False)
+
+    @model_validator(mode="after")
+    def _validate_normalized_total(self) -> "MortalityWeights":
+        total = (
+            self.adoption_weight
+            + self.community_weight
+            + self.vendor_weight
+            + self.talent_weight
+            + self.migration_weight
+        )
+        if abs(total - 1.0) > 1e-9:
+            raise ValueError("Mortality weights must sum to 1.0")
+        return self
 
 
 class TechnologyMortality(BaseModel):
