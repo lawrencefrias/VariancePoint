@@ -104,8 +104,14 @@ def _save_insights(insights: list[CommunityInsight]) -> None:
         os.close(fd)
         os.replace(tmp_path, _INSIGHTS_FILE)
     except Exception:
-        os.close(fd)
-        os.unlink(tmp_path)
+        try:
+            os.close(fd)
+        except OSError:
+            pass
+        try:
+            os.unlink(tmp_path)
+        except OSError:
+            pass
         raise
 
 
