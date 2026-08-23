@@ -1,0 +1,20 @@
+# Environment files – must not be baked into images
+.env
+.env.*
+apps/**/.env
+apps/**/.env.*
+
+# Python artifacts
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+
+# Node artifacts
+node_modules/
+.next/
+out/
+dist/
+
+# OS
+.DS_Store
