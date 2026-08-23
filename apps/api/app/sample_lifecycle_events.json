@@ -1,0 +1,4 @@
+[
+  {"technology": "Windows Server 2016", "event": "end_of_support", "date": "2027-01-12"},
+  {"technology": "Exchange On-Prem", "event": "extended_support", "date": "2028-10-14"}
+]

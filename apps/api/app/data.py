@@ -23,7 +23,7 @@ _TECHNOLOGY_NAME_TO_ID: dict[str, str] = {t.name: t.id for t in TECHNOLOGIES}
 _LIFECYCLE_SEED_FILE = Path(
     os.environ.get(
         "LIFECYCLE_SEED_FILE",
-        str(Path(__file__).parents[3] / "datasets" / "lifecycle" / "sample_lifecycle_events.json"),
+        str(Path(__file__).parent / "sample_lifecycle_events.json"),
     )
 )
 
