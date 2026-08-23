@@ -62,11 +62,8 @@ def calculate_variance(req: VarianceAssessmentRequest) -> VarianceAssessment:
     current = set(req.current.platforms)
     target = set(req.target.platforms)
 
-    if not target:
-        delta_ratio = 0.0
-    else:
-        matched = len(current & target)
-        delta_ratio = 1 - (matched / len(target))
+    union = current | target
+    delta_ratio = 0.0 if not union else len(current ^ target) / len(union)
 
     base = round(delta_ratio * 100, 2)
     breakdown = VarianceBreakdown(
