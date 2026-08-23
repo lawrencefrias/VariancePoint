@@ -96,8 +96,8 @@ class RealityBranch(BaseModel):
 
 
 class RealitySimulationRequest(BaseModel):
-    users: int = Field(gt=0)
-    servers: int = Field(gt=0)
+    users: int = Field(gt=0, le=1_000_000)
+    servers: int = Field(gt=0, le=100_000)
     technologies: List[str] = Field(default_factory=list)
 
 

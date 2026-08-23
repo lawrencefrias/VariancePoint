@@ -15,11 +15,17 @@ TECHNOLOGIES = [
     Technology(id="exchange-onprem", name="Exchange On-Prem", vendor="Microsoft", category="Messaging"),
     Technology(id="vmware-legacy", name="Legacy VMware Estate", vendor="Broadcom", category="Virtualization"),
     Technology(id="sccm-legacy", name="Legacy SCCM", vendor="Microsoft", category="Endpoint Management"),
+    Technology(id="windows-server-2016", name="Windows Server 2016", vendor="Microsoft", category="Server"),
 ]
 
 _TECHNOLOGY_NAME_TO_ID: dict[str, str] = {t.name: t.id for t in TECHNOLOGIES}
 
-_LIFECYCLE_SEED_FILE = Path(__file__).parents[3] / "datasets" / "lifecycle" / "sample_lifecycle_events.json"
+_LIFECYCLE_SEED_FILE = Path(
+    os.environ.get(
+        "LIFECYCLE_SEED_FILE",
+        str(Path(__file__).parents[3] / "datasets" / "lifecycle" / "sample_lifecycle_events.json"),
+    )
+)
 
 
 def _load_lifecycle_events() -> list[LifecycleEvent]:

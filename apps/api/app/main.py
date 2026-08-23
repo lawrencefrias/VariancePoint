@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 
 from .data import COMMUNITY_INSIGHTS, LIFECYCLE_EVENTS, MORTALITY_INPUTS, TECHNOLOGIES, _INSIGHTS_LOCK, _save_insights
 from .models import (
@@ -95,7 +95,7 @@ def dashboard_summary() -> DashboardSummary:
     return DashboardSummary(
         technology_health_score=68.4,
         debt_exposure_count=len([e for e in debt_entries if e.days_remaining < 730]),
-        upcoming_deadlines=len([e for e in debt_entries if e.days_remaining < 365]),
+        upcoming_deadlines=len([e for e in debt_entries if 0 <= e.days_remaining < 365]),
         mortality_exposure_count=mortality_exposure,
         budget_impact_forecast=2_450_000.0,
         top_risks=[
@@ -111,9 +111,14 @@ def list_community_insights():
     return COMMUNITY_INSIGHTS
 
 
+_MAX_INSIGHTS = 10_000
+
+
 @app.post("/api/v1/community-insights", response_model=CommunityInsight)
 def create_community_insight(payload: CommunityInsight):
     with _INSIGHTS_LOCK:
+        if len(COMMUNITY_INSIGHTS) >= _MAX_INSIGHTS:
+            raise HTTPException(status_code=429, detail="Submission quota reached")
         COMMUNITY_INSIGHTS.append(payload)
         _save_insights(COMMUNITY_INSIGHTS)
     return payload
