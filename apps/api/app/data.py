@@ -5,7 +5,7 @@ import os
 from datetime import date
 from pathlib import Path
 
-from .models import CommunityInsight, LifecycleEvent, Technology
+from .models import CommunityInsight, LifecycleEvent, MortalityInput, Technology
 
 TECHNOLOGIES = [
     Technology(id="adfs", name="ADFS", vendor="Microsoft", category="Identity"),
@@ -19,6 +19,49 @@ LIFECYCLE_EVENTS = [
     LifecycleEvent(technology_id="exchange-onprem", event_type="end_of_support", event_date=date(2028, 5, 5)),
     LifecycleEvent(technology_id="vmware-legacy", event_type="vendor_retirement_signal", event_date=date(2027, 4, 21)),
     LifecycleEvent(technology_id="sccm-legacy", event_type="extended_support", event_date=date(2027, 10, 18)),
+]
+
+MORTALITY_INPUTS: list[MortalityInput] = [
+    MortalityInput(
+        technology_id="adfs",
+        adoption_score=20.0,
+        community_momentum_score=15.0,
+        vendor_investment_score=10.0,
+        talent_availability_score=25.0,
+        migration_urgency_score=80.0,
+    ),
+    MortalityInput(
+        technology_id="citrix-virtual-apps",
+        adoption_score=35.0,
+        community_momentum_score=30.0,
+        vendor_investment_score=25.0,
+        talent_availability_score=40.0,
+        migration_urgency_score=60.0,
+    ),
+    MortalityInput(
+        technology_id="exchange-onprem",
+        adoption_score=25.0,
+        community_momentum_score=20.0,
+        vendor_investment_score=15.0,
+        talent_availability_score=30.0,
+        migration_urgency_score=70.0,
+    ),
+    MortalityInput(
+        technology_id="vmware-legacy",
+        adoption_score=30.0,
+        community_momentum_score=20.0,
+        vendor_investment_score=10.0,
+        talent_availability_score=35.0,
+        migration_urgency_score=85.0,
+    ),
+    MortalityInput(
+        technology_id="sccm-legacy",
+        adoption_score=40.0,
+        community_momentum_score=35.0,
+        vendor_investment_score=30.0,
+        talent_availability_score=45.0,
+        migration_urgency_score=55.0,
+    ),
 ]
 
 _INSIGHTS_FILE = Path(os.environ.get("INSIGHTS_FILE", Path(__file__).parent.parent / "community_insights.json"))

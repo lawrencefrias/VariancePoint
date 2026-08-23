@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from fastapi import FastAPI
 
-from .data import COMMUNITY_INSIGHTS, LIFECYCLE_EVENTS, TECHNOLOGIES, _save_insights
+from .data import COMMUNITY_INSIGHTS, LIFECYCLE_EVENTS, MORTALITY_INPUTS, TECHNOLOGIES, _save_insights
 from .models import (
     CommunityInsight,
     DashboardSummary,
@@ -10,6 +10,7 @@ from .models import (
     MortalityWeights,
     RealitySimulationRequest,
     RealitySimulationResponse,
+    RiskLevel,
     TechnologyMortality,
     VarianceAssessment,
     VarianceAssessmentRequest,
@@ -83,9 +84,13 @@ def generate_reality(req: RealitySimulationRequest):
 @app.get("/api/v1/dashboard/summary", response_model=DashboardSummary)
 def dashboard_summary() -> DashboardSummary:
     debt_entries = debt_clock()
-    mortality_exposure = 0
-    if debt_entries:
-        mortality_exposure = len([e for e in debt_entries if e.risk_level in {"amber", "red"}])
+    mortality_exposure = len(
+        [
+            row
+            for row in MORTALITY_INPUTS
+            if risk_from_score(calculate_mortality_score(row)) in {RiskLevel.amber, RiskLevel.red}
+        ]
+    )
 
     return DashboardSummary(
         technology_health_score=68.4,
