@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import json
 import os
+import tempfile
+import threading
 from datetime import date
 from pathlib import Path
 
@@ -83,6 +85,7 @@ MORTALITY_INPUTS: list[MortalityInput] = [
 ]
 
 _INSIGHTS_FILE = Path(os.environ.get("INSIGHTS_FILE", Path(__file__).parent.parent / "community_insights.json"))
+_INSIGHTS_LOCK = threading.Lock()
 
 
 def _load_insights() -> list[CommunityInsight]:
@@ -94,7 +97,16 @@ def _load_insights() -> list[CommunityInsight]:
 
 def _save_insights(insights: list[CommunityInsight]) -> None:
     _INSIGHTS_FILE.parent.mkdir(parents=True, exist_ok=True)
-    _INSIGHTS_FILE.write_text(json.dumps([item.model_dump() for item in insights], default=str))
+    payload = json.dumps([item.model_dump() for item in insights], default=str)
+    fd, tmp_path = tempfile.mkstemp(dir=_INSIGHTS_FILE.parent)
+    try:
+        os.write(fd, payload.encode())
+        os.close(fd)
+        os.replace(tmp_path, _INSIGHTS_FILE)
+    except Exception:
+        os.close(fd)
+        os.unlink(tmp_path)
+        raise
 
 
 COMMUNITY_INSIGHTS: list[CommunityInsight] = _load_insights()
