@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import date, timedelta
+from datetime import date
 
 from .models import CommunityInsight, LifecycleEvent, Technology
 
@@ -13,9 +13,9 @@ TECHNOLOGIES = [
 ]
 
 LIFECYCLE_EVENTS = [
-    LifecycleEvent(technology_id="exchange-onprem", event_type="end_of_support", event_date=date.today() + timedelta(days=620)),
-    LifecycleEvent(technology_id="vmware-legacy", event_type="vendor_retirement_signal", event_date=date.today() + timedelta(days=240)),
-    LifecycleEvent(technology_id="sccm-legacy", event_type="extended_support", event_date=date.today() + timedelta(days=420)),
+    LifecycleEvent(technology_id="exchange-onprem", event_type="end_of_support", event_date=date(2028, 5, 5)),
+    LifecycleEvent(technology_id="vmware-legacy", event_type="vendor_retirement_signal", event_date=date(2027, 4, 21)),
+    LifecycleEvent(technology_id="sccm-legacy", event_type="extended_support", event_date=date(2027, 10, 18)),
 ]
 
 COMMUNITY_INSIGHTS: list[CommunityInsight] = []
