@@ -4,6 +4,9 @@ __pycache__/
 .venv/
 .pytest_cache/
 
+# Runtime data
+apps/api/community_insights.json
+
 # Node
 node_modules/
 .next/

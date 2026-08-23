@@ -10,6 +10,9 @@ __pycache__/
 .venv/
 .pytest_cache/
 
+# Runtime data – must not be baked into images or committed
+apps/api/community_insights.json
+
 # Node artifacts
 node_modules/
 .next/
