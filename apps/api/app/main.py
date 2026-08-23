@@ -1,6 +1,9 @@
 from __future__ import annotations
 
-from fastapi import FastAPI, HTTPException
+import time
+from collections import defaultdict
+
+from fastapi import FastAPI, HTTPException, Request
 
 from .data import COMMUNITY_INSIGHTS, LIFECYCLE_EVENTS, MORTALITY_INPUTS, TECHNOLOGIES, _INSIGHTS_LOCK, _save_insights
 from .models import (
@@ -114,11 +117,28 @@ def list_community_insights():
     return COMMUNITY_INSIGHTS
 
 
-_MAX_INSIGHTS = 10_000
+_MAX_INSIGHTS = 1_000
+
+# Rate limiting: max submissions per IP within the window
+_RATE_LIMIT = 5
+_RATE_WINDOW = 60  # seconds
+_rate_counters: dict[str, list[float]] = defaultdict(list)
+_rate_lock = __import__("threading").Lock()
 
 
 @app.post("/api/v1/community-insights", response_model=CommunityInsight)
-def create_community_insight(payload: CommunityInsight):
+def create_community_insight(payload: CommunityInsight, request: Request):
+    client_ip = request.client.host if request.client else "unknown"
+    now = time.monotonic()
+
+    with _rate_lock:
+        timestamps = _rate_counters[client_ip]
+        # Discard entries outside the sliding window
+        _rate_counters[client_ip] = [t for t in timestamps if now - t < _RATE_WINDOW]
+        if len(_rate_counters[client_ip]) >= _RATE_LIMIT:
+            raise HTTPException(status_code=429, detail="Rate limit exceeded; try again later")
+        _rate_counters[client_ip].append(now)
+
     with _INSIGHTS_LOCK:
         if len(COMMUNITY_INSIGHTS) >= _MAX_INSIGHTS:
             raise HTTPException(status_code=429, detail="Submission quota reached")
