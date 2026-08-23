@@ -15,11 +15,29 @@ TECHNOLOGIES = [
     Technology(id="sccm-legacy", name="Legacy SCCM", vendor="Microsoft", category="Endpoint Management"),
 ]
 
-LIFECYCLE_EVENTS = [
-    LifecycleEvent(technology_id="exchange-onprem", event_type="end_of_support", event_date=date(2028, 5, 5)),
-    LifecycleEvent(technology_id="vmware-legacy", event_type="vendor_retirement_signal", event_date=date(2027, 4, 21)),
-    LifecycleEvent(technology_id="sccm-legacy", event_type="extended_support", event_date=date(2027, 10, 18)),
-]
+_TECHNOLOGY_NAME_TO_ID: dict[str, str] = {t.name: t.id for t in TECHNOLOGIES}
+
+_LIFECYCLE_SEED_FILE = Path(__file__).parents[3] / "datasets" / "lifecycle" / "sample_lifecycle_events.json"
+
+
+def _load_lifecycle_events() -> list[LifecycleEvent]:
+    raw: list[dict] = json.loads(_LIFECYCLE_SEED_FILE.read_text())
+    events: list[LifecycleEvent] = []
+    for entry in raw:
+        technology_id = _TECHNOLOGY_NAME_TO_ID.get(entry["technology"])
+        if technology_id is None:
+            continue
+        events.append(
+            LifecycleEvent(
+                technology_id=technology_id,
+                event_type=entry["event"],
+                event_date=date.fromisoformat(entry["date"]),
+            )
+        )
+    return events
+
+
+LIFECYCLE_EVENTS: list[LifecycleEvent] = _load_lifecycle_events()
 
 MORTALITY_INPUTS: list[MortalityInput] = [
     MortalityInput(
